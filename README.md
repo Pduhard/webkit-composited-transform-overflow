@@ -4,6 +4,8 @@ Open in a browser: https://pduhard.github.io/webkit-composited-transform-overflo
 
 WebKit bug: https://bugs.webkit.org/show_bug.cgi?id=81989
 
+Fix proposed in draft PR https://github.com/WebKit/WebKit/pull/75516
+
 ## What happens
 
 A `300×200` `overflow: hidden` box holds a full-size card with `transform: translateX(300px)`. The card is composited: it has a `transform: translateZ(0)` child, or `will-change: transform` itself. Script sets the card's transform to `translateX(0px)`.
