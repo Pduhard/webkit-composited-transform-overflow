@@ -1,0 +1,1 @@
+{ "type": "module", "private": true, "scripts": { "repro": "node run.mjs" }, "dependencies": { "playwright": "1.60.0" } }

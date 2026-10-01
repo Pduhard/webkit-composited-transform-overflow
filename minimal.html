@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>minimal</title>
+<style>
+  body { margin: 0; }
+  #box { width: 300px; height: 200px; overflow: hidden; }
+  #card { height: 100%; transform: translateX(300px); background: steelblue; }
+  #layer { width: 50px; height: 50px; transform: translateZ(0); background: tomato; }
+</style>
+<div id="box"><div id="card"><div id="layer"></div></div></div>
+<pre id="out"></pre>
+<script>
+  const frames = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const report = (label) => {
+    box.scrollLeft = 0;
+    box.scrollLeft = 150;
+    out.textContent += `${label}: scrollWidth=${box.scrollWidth} scrollLeft=150 -> ${box.scrollLeft}\n`;
+    box.scrollLeft = 0;
+  };
+  (async () => {
+    await frames();
+    report("translateX(300px)");
+    card.style.transform = "translateX(0px)";
+    await frames();
+    report("translateX(0px)");
+    card.style.transform = "none";
+    await frames();
+    report("none");
+    document.title = "done " + out.textContent.replaceAll("\n", " | ");
+  })();
+</script>

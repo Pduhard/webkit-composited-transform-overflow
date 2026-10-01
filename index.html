@@ -1,0 +1,49 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>running</title>
+<p><a href="minimal.html">minimal.html</a> · <a href="https://bugs.webkit.org/show_bug.cgi?id=81989">WebKit bug 81989</a></p>
+<style>
+  body { margin: 0; font: 13px monospace; }
+  .box { width: 300px; height: 200px; overflow: hidden; margin-bottom: 8px; }
+  .card { height: 100%; background: steelblue; }
+  .layer { width: 50px; height: 50px; transform: translateZ(0); background: tomato; }
+  .wc { will-change: transform; }
+</style>
+<div class="box" id="a"><div class="card" style="transform: translateX(300px)"><div class="layer"></div></div></div>
+<div class="box" id="b"><div class="card wc" style="transform: translateX(300px)"></div></div>
+<div class="box" id="c"><div class="card" style="transform: translateX(300px)"><div class="layer"></div></div></div>
+<div class="box" id="d"><div class="card" style="transform: translateX(300px)"></div></div>
+<pre id="out"></pre>
+<script>
+  const frames = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const lines = [];
+  const log = (s) => { lines.push(s); document.getElementById("out").textContent = lines.join("\n"); };
+  const probe = (box) => {
+    box.scrollLeft = 0;
+    box.scrollLeft = 150;
+    const r = `scrollWidth=${box.scrollWidth} scrollLeft=150->${box.scrollLeft}`;
+    box.scrollLeft = 0;
+    return r;
+  };
+  const move = async (id, value) => {
+    document.querySelector(`#${id} .card`).style.transform = value;
+    await frames();
+  };
+  (async () => {
+    await frames();
+    for (const [id, name] of [["a", "translateZ(0) child"], ["b", "will-change on card"], ["d", "control, no layer"]]) {
+      const box = document.getElementById(id);
+      await move(id, "translateX(0px)");
+      log(`${name}: after translateX(0px): ${probe(box)} [expect 300, 0]`);
+      await move(id, "none");
+      log(`${name}: after none: ${probe(box)} [expect 300, 0]`);
+    }
+    const c = document.getElementById("c");
+    await move("c", "translateX(0px)");
+    c.style.width = "301px"; c.offsetWidth; c.style.width = ""; await frames();
+    log(`other direction: translateX(0px) + relayout: ${probe(c)} [expect 300, 0]`);
+    await move("c", "translateX(100px)");
+    log(`other direction: after translateX(100px): ${probe(c)} [expect 400, 100]`);
+    document.title = "done " + lines.join(" | ");
+  })();
+</script>
